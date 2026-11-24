@@ -21,10 +21,17 @@ import { deriveStates } from "./stateRoles";
 
 const TITLE_SEPARATORS = /\s+[—–|·:-]\s+|:\s+/;
 
+/** Prefers the title segment that names the brand behind the domain, then the leading segment. */
 function deriveName(raw: RawExtraction): string {
-  const lead = raw.source.title.split(TITLE_SEPARATORS)[0]?.trim();
+  const hostname = new URL(raw.source.url).hostname.replace(/^www\./, "");
+  const brand = hostname.split(".").slice(-2, -1)[0]?.replace(/-/g, " ") ?? hostname;
+  const segments = raw.source.title.split(TITLE_SEPARATORS).map((segment) => segment.trim()).filter(Boolean);
+  const compact = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const named = segments.find((segment) => compact(segment).includes(compact(brand)) && segment.length <= 40);
+  if (named) return named;
+  const lead = segments[0];
   if (lead && lead.length <= 40) return lead;
-  return new URL(raw.source.url).hostname.replace(/^www\./, "");
+  return brand.charAt(0).toUpperCase() + brand.slice(1);
 }
 
 export function normalizeDeterministic(raw: RawExtraction): DesignSystemTokens {
