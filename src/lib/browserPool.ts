@@ -3,6 +3,8 @@ import { ExtractionError } from "./extractionError";
 
 const LAUNCH_ARGS = ["--disable-gpu", "--disable-dev-shm-usage", "--disable-extensions", "--mute-audio", "--no-first-run"];
 const MAX_CONCURRENT = 3;
+/** Single-process mode tears the browser down when the first context closes, which breaks reuse. */
+const SERVERLESS_EXCLUDED_ARGS = new Set(["--single-process"]);
 
 const globalStore = globalThis as typeof globalThis & {
   __swatchBrowser?: Promise<Browser>;
@@ -21,12 +23,14 @@ async function launch(): Promise<Browser> {
   const { default: serverless } = await import("@sparticuz/chromium");
   return chromium.launch({
     headless: true,
-    args: [...serverless.args, ...LAUNCH_ARGS],
+    args: [...serverless.args.filter((arg) => !SERVERLESS_EXCLUDED_ARGS.has(arg)), ...LAUNCH_ARGS],
     executablePath: await serverless.executablePath(),
   });
 }
 
-export function getBrowser(): Promise<Browser> {
+export async function getBrowser(): Promise<Browser> {
+  const cached = await globalStore.__swatchBrowser?.catch(() => undefined);
+  if (cached && !cached.isConnected()) globalStore.__swatchBrowser = undefined;
   if (!globalStore.__swatchBrowser) {
     globalStore.__swatchBrowser = launch()
       .then((browser) => {
