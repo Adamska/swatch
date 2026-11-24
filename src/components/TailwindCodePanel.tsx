@@ -3,7 +3,7 @@
 import { useDeferredValue, useMemo } from "react";
 import { useCopy } from "@/hooks/useCopy";
 import { highlightCode, type CodeSegmentKind } from "@/lib/highlight";
-import { EXPORT_FORMATS, exportTokens } from "@/lib/tailwindExporter";
+import { EXPORT_FORMATS, exportTokens, type ExportFormatInfo } from "@/lib/tailwindExporter";
 import { selectTokens, useTokenStore } from "@/store/useTokenStore";
 import { Plate } from "./ui/Plate";
 
@@ -15,6 +15,15 @@ const SEGMENT_CLASS: Record<CodeSegmentKind, string> = {
   key: "text-[#9fb4c7]",
   variable: "text-[#9fb4c7]",
 };
+
+function download(format: ExportFormatInfo, contents: string) {
+  const url = URL.createObjectURL(new Blob([contents], { type: `${format.mime};charset=utf-8` }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = format.filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export function TailwindCodePanel() {
   const tokens = useTokenStore(selectTokens);
@@ -36,16 +45,25 @@ export function TailwindCodePanel() {
       index="03"
       title="Export"
       meta={
-        <button
-          type="button"
-          onClick={() => void copy(exportTokens(tokens, format))}
-          className={`bracket-button text-[10.5px] ${copied ? "text-signal" : ""}`}
-        >
-          {copied ? "Copied" : `Copy ${active.filename}`}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => download(active, exportTokens(tokens, format))}
+            className="bracket-button text-[10.5px]"
+          >
+            Download
+          </button>
+          <button
+            type="button"
+            onClick={() => void copy(exportTokens(tokens, format))}
+            className={`bracket-button text-[10.5px] ${copied ? "text-signal" : ""}`}
+          >
+            {copied ? "Copied" : `Copy ${active.filename}`}
+          </button>
+        </>
       }
     >
-      <div role="tablist" aria-label="Export format" className="flex border-b border-hairline">
+      <div role="tablist" aria-label="Export format" className="flex overflow-x-auto border-b border-hairline">
         {EXPORT_FORMATS.map((entry) => {
           const isActive = entry.id === format;
           return (
@@ -55,7 +73,7 @@ export function TailwindCodePanel() {
               role="tab"
               aria-selected={isActive}
               onClick={() => setFormat(entry.id)}
-              className={`label border-r border-hairline px-4 py-3 transition-colors ${
+              className={`label shrink-0 whitespace-nowrap border-r border-hairline px-4 py-3 transition-colors ${
                 isActive ? "bg-white/[0.035] text-ink shadow-[inset_0_-1px_0_var(--color-signal)]" : "text-ink-dim hover:text-ink"
               }`}
             >
