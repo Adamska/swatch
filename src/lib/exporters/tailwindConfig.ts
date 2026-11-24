@@ -17,8 +17,12 @@ import {
 type Entry = [key: string, value: string];
 
 const keyOf = (key: string) => (/^[a-zA-Z_$][\w$]*$/.test(key) ? key : quote(key));
-const object = (entries: Entry[]) => `{ ${entries.map(([key, value]) => `${keyOf(key)}: ${value}`).join(", ")} }`;
 const block = (entries: Entry[], indent: string) => entries.map(([key, value]) => `${indent}${keyOf(key)}: ${value},`).join("\n");
+const inline = (entries: Entry[]) => `{ ${entries.map(([key, value]) => `${keyOf(key)}: ${value}`).join(", ")} }`;
+
+/** Short objects stay on one line; scales break across lines at the nesting depth of a color entry. */
+const object = (entries: Entry[]) =>
+  entries.length <= 3 ? inline(entries) : `{\n${block(entries, "          ")}\n        }`;
 
 export function toTailwindConfig(tokens: DesignSystemTokens): string {
   const { colors, states, typography, spacing, radii, shadows } = tokens;

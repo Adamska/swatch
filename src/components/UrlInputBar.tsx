@@ -3,10 +3,12 @@
 import { useState, type FormEvent, type MouseEvent } from "react";
 import { SAMPLE_PROFILES } from "@/lib/samples";
 import { getSampleTokens, selectIsBusy, useTokenStore, type SpotlightOrigin } from "@/store/useTokenStore";
+import { CaptureLog } from "./CaptureLog";
+import { RecentCaptures } from "./RecentCaptures";
 
 const STATUS_COPY = {
   idle: "Enter a public URL, or put a sample profile on the bench.",
-  extracting: "Headless Chromium is sampling computed styles",
+  extracting: "Headless Chromium is inspecting the page",
   normalizing: "Clustering colors and fitting scales",
   ready: "Specimen ready. Tune any token and the bench follows.",
   error: "Extraction failed.",
@@ -112,6 +114,8 @@ export function UrlInputBar() {
           {isBusy && !error ? <span className="animate-pulse"> ...</span> : null}
         </p>
       </div>
+      <RecentCaptures />
+      <CaptureLog />
     </section>
   );
 }

@@ -1,0 +1,147 @@
+@layer components {
+  .darkroom {
+    position: relative;
+    isolation: isolate;
+    overflow-x: clip;
+  }
+
+  .darkroom-ground {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: --glow 900ms var(--ease-spotlight);
+    background:
+      radial-gradient(120% 70% at 50% -10%, color-mix(in oklab, var(--glow) 20%, transparent), transparent 62%),
+      radial-gradient(circle at center, rgba(255, 255, 255, 0.075) 0.6px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px) 0 0 / 100% 120px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px) 0 0 / 120px 100%;
+    mask-image: radial-gradient(140% 100% at 50% 0%, #000 55%, transparent 100%);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .readout {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  .plate {
+    position: relative;
+    border: 1px solid var(--color-hairline);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.008));
+  }
+
+  .plate::before {
+    --mark: rgba(255, 255, 255, 0.34);
+    content: "";
+    position: absolute;
+    inset: -7px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--mark), var(--mark)) left 0 top 6px / 4px 1px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) left 6px top 0 / 1px 4px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) right 0 top 6px / 4px 1px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) right 6px top 0 / 1px 4px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) left 0 bottom 6px / 4px 1px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) left 6px bottom 0 / 1px 4px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) right 0 bottom 6px / 4px 1px no-repeat,
+      linear-gradient(var(--mark), var(--mark)) right 6px bottom 0 / 1px 4px no-repeat;
+  }
+
+  .bracket-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      transform 160ms var(--ease-spotlight);
+  }
+
+  .bracket-button::before,
+  .bracket-button::after {
+    color: var(--color-ink-faint);
+    transition:
+      transform 220ms var(--ease-spotlight),
+      color 160ms ease;
+  }
+
+  .bracket-button::before {
+    content: "[";
+  }
+
+  .bracket-button::after {
+    content: "]";
+  }
+
+  .bracket-button:hover:not(:disabled)::before {
+    transform: translateX(-3px);
+    color: var(--color-signal);
+  }
+
+  .bracket-button:hover:not(:disabled)::after {
+    transform: translateX(3px);
+    color: var(--color-signal);
+  }
+
+  .bracket-button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .bracket-button:disabled {
+    color: var(--color-ink-faint);
+    cursor: not-allowed;
+  }
+
+  .morph {
+    transition-property: background-color, color, border-color, flex-grow, width, height, left, border-radius, box-shadow;
+    transition-duration: 90ms;
+    transition-timing-function: linear;
+  }
+
+  [data-morphing="true"] .morph {
+    transition-duration: var(--morph);
+    transition-timing-function: var(--ease-spotlight);
+  }
+
+  .fine-range {
+    appearance: none;
+    height: 14px;
+    background:
+      linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)) center / 100% 1px no-repeat,
+      repeating-linear-gradient(90deg, var(--color-hairline-strong) 0 1px, transparent 1px 8px) center / 100% 5px no-repeat;
+    cursor: ew-resize;
+  }
+
+  .fine-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 3px;
+    height: 14px;
+    background: var(--color-signal);
+    border: 0;
+    border-radius: 0;
+  }
+
+  .fine-range::-moz-range-thumb {
+    width: 3px;
+    height: 14px;
+    background: var(--color-signal);
+    border: 0;
+    border-radius: 0;
+  }
+}

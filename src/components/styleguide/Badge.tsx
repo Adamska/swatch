@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import styles from "./stage.module.css";
+import styles from "./controls.module.css";
 
 export type BadgeTone = "neutral" | "primary" | "secondary" | "accent" | "success" | "warning" | "danger";
 

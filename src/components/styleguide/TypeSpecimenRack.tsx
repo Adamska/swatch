@@ -2,6 +2,8 @@
 
 import { memo, useRef, useState } from "react";
 import { useFontMetrics } from "@/hooks/useFontMetrics";
+import { useFaceStatus } from "@/hooks/useWebFonts";
+import { focusHandlers } from "@/store/useViewStore";
 import { leadFamily, resolveFontStack } from "@/lib/tokenStyle";
 import { selectTypography, useTokenStore } from "@/store/useTokenStore";
 import type { FontRole, TypeStep } from "@/types/tokens";
@@ -13,6 +15,37 @@ const SPECIMEN_TEXT: Record<FontRole, string> = {
 };
 const FONT_ROLES: FontRole[] = ["display", "body", "mono"];
 const trim = (value: number) => String(Math.round(value * 1000) / 1000);
+
+const STATUS_COPY = {
+  bundled: "Bundled face",
+  available: "Installed locally",
+  loading: "Requesting face",
+  fallback: "Not available, using fallback",
+} as const;
+
+function FaceCard({ role, stack, optical }: { role: FontRole; stack: string; optical: boolean }) {
+  const { status, viaGoogle } = useFaceStatus(stack);
+  const label = viaGoogle && status === "available" ? "Loaded from Google Fonts" : STATUS_COPY[status];
+  return (
+    <div className="bg-carbon px-4 py-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="label">{role}</p>
+        <span
+          title={label}
+          className={`h-1.5 w-1.5 rounded-full ${status === "fallback" ? "bg-signal" : status === "loading" ? "animate-pulse bg-ink-faint" : "bg-[#7fd18b]"}`}
+        />
+      </div>
+      <p className="mt-2 text-[52px] leading-none text-ink" style={{ fontFamily: resolveFontStack(stack), fontOpticalSizing: optical ? "auto" : "none" }}>
+        Ag
+      </p>
+      <p className="mt-3 truncate text-[13px] text-ink">{leadFamily(stack)}</p>
+      <p className={`mt-0.5 text-[11px] ${status === "fallback" ? "text-signal" : "text-ink-faint"}`}>{label}</p>
+      <p className="readout mt-1 truncate text-[10.5px] text-ink-faint" title={stack}>
+        {stack}
+      </p>
+    </div>
+  );
+}
 
 interface SpecimenRowProps {
   step: TypeStep;
@@ -36,7 +69,10 @@ const SpecimenRow = memo(function SpecimenRow({ step, index, stack, optical }: S
       : [];
 
   return (
-    <li className="grid grid-cols-[150px_minmax(0,1fr)] border-t border-hairline">
+    <li
+      className="grid grid-cols-[150px_minmax(0,1fr)] border-t border-hairline"
+      {...focusHandlers({ kind: "type", value: String(step.sizePx), label: `Type ${step.name} · ${trim(step.sizePx)} px` })}
+    >
       <div className="border-r border-hairline px-3 py-3">
         <p className="label text-signal">{step.name}</p>
         <p className="readout mt-1.5 whitespace-nowrap text-ink">
@@ -46,6 +82,11 @@ const SpecimenRow = memo(function SpecimenRow({ step, index, stack, optical }: S
           LH {trim(step.lineHeight)} · W {step.weight}
         </p>
         <p className="readout text-[11px] text-ink-dim">LS {trim(step.letterSpacingEm)} em</p>
+        {step.fluidMinPx !== null ? (
+          <p className="readout mt-0.5 text-[11px] text-signal" title="Measured at a 390 px viewport, interpolated to 1440 px">
+            Fluid {trim(step.fluidMinPx)} → {trim(step.sizePx)}
+          </p>
+        ) : null}
         <input
           type="range"
           min={8}
@@ -96,19 +137,7 @@ export function TypeSpecimenRack() {
     <div>
       <div className="grid gap-px bg-hairline sm:grid-cols-3">
         {FONT_ROLES.map((role) => (
-          <div key={role} className="bg-carbon px-4 py-4">
-            <p className="label">{role}</p>
-            <p
-              className="mt-2 text-[52px] leading-none text-ink"
-              style={{ fontFamily: resolveFontStack(typography.families[role]), fontOpticalSizing: optical ? "auto" : "none" }}
-            >
-              Ag
-            </p>
-            <p className="mt-3 truncate text-[13px] text-ink">{leadFamily(typography.families[role])}</p>
-            <p className="readout mt-0.5 truncate text-[10.5px] text-ink-faint" title={typography.families[role]}>
-              {typography.families[role]}
-            </p>
-          </div>
+          <FaceCard key={role} role={role} stack={typography.families[role]} optical={optical} />
         ))}
       </div>
 
@@ -140,8 +169,8 @@ export function TypeSpecimenRack() {
         ))}
       </ol>
       <p className="border-t border-hairline px-4 py-3 text-[11.5px] text-ink-faint">
-        Specimens render with the extracted stack. Faces that are not installed locally fall back to the next family
-        in that stack, and the guides are measured from whichever face the browser resolves.
+        Specimens render with the extracted stack. Faces published on Google Fonts are requested automatically; others
+        fall back to the next family in the stack. Guides are measured from whichever face the browser resolves.
       </p>
     </div>
   );

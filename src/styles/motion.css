@@ -1,0 +1,121 @@
+@keyframes bench-reveal {
+  from {
+    clip-path: circle(0% at var(--spot-x, 50%) var(--spot-y, 20%));
+    opacity: 0.4;
+  }
+  to {
+    clip-path: circle(160% at var(--spot-x, 50%) var(--spot-y, 20%));
+    opacity: 1;
+  }
+}
+
+@keyframes spotlight-sweep {
+  from {
+    transform: translate(-50%, -50%) scale(0.05);
+    opacity: 0.85;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bench-reveal {
+  animation: bench-reveal 1100ms var(--ease-spotlight) both;
+}
+
+.spotlight-sweep {
+  position: fixed;
+  left: var(--spot-x, 50%);
+  top: var(--spot-y, 20%);
+  z-index: 40;
+  width: 260vmax;
+  height: 260vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    transparent 46%,
+    color-mix(in oklab, var(--glow) 34%, transparent) 49%,
+    rgba(255, 255, 255, 0.16) 50%,
+    color-mix(in oklab, var(--glow) 18%, transparent) 51%,
+    transparent 56%
+  );
+  animation: spotlight-sweep 1200ms var(--ease-spotlight) both;
+}
+
+.rise {
+  animation: rise 520ms var(--ease-spotlight) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --morph: 1ms;
+  }
+
+  .bench-reveal,
+  .spotlight-sweep,
+  .rise {
+    animation: none;
+  }
+
+  .spotlight-sweep {
+    display: none;
+  }
+}
+
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: grayscale(1) brightness(0.3) contrast(1.6) blur(1.5px);
+    transform: translateY(8px);
+  }
+  55% {
+    opacity: 1;
+    filter: grayscale(0.6) brightness(0.75) contrast(1.25) blur(0.4px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+.develop {
+  animation: develop 980ms var(--ease-spotlight) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+.drop-hatch {
+  background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in oklab, var(--color-signal) 45%, transparent) 6px 7px);
+}
+
+.specimen-poster {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .develop {
+    animation: none;
+  }
+}

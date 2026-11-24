@@ -1,20 +1,59 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
+import { resolveFontStack } from "@/lib/tokenStyle";
 import { SAMPLE_PROFILES } from "@/lib/samples";
-import { selectIsBusy, useTokenStore } from "@/store/useTokenStore";
+import { getSampleTokens, selectIsBusy, useTokenStore } from "@/store/useTokenStore";
 import { RegistrationMark } from "./ui/RegistrationMark";
 
 const STAGES = [
-  ["01", "Inspect", "Headless Chromium opens the page with media, fonts and trackers blocked."],
-  ["02", "Sample", "Computed styles are read from landmarks, type, surfaces and controls."],
-  ["03", "Normalize", "Colors are clustered perceptually and scales are fitted to a grid."],
-  ["04", "Export", "Tune any token, then copy a Tailwind config or CSS variables."],
+  ["01", "Inspect", "Headless Chromium opens the page and two internal pages with media and trackers blocked."],
+  ["02", "Sample", "Computed styles, hover and focus states, the dark scheme and mobile type are recorded."],
+  ["03", "Normalize", "Colors are clustered perceptually and scales are fitted to a grid in OKLCH."],
+  ["04", "Export", "Tune any token, then export Tailwind, CSS variables, shadcn/ui or Design Tokens."],
 ] as const;
+const CARD_OFFSETS = [-3, -2, -1, 1, 2, 3];
+const CYCLE_MS = 2600;
+
+function DriftingCard({ offset, cycle }: { offset: number; cycle: number }) {
+  const profile = SAMPLE_PROFILES[(cycle + offset + SAMPLE_PROFILES.length * 4) % SAMPLE_PROFILES.length];
+  const tokens = getSampleTokens(profile.id);
+  if (!tokens) return null;
+  const { colors, typography } = tokens;
+
+  return (
+    <span
+      className="hidden h-[210px] w-[150px] shrink-0 flex-col overflow-hidden border border-hairline-strong transition-[transform,opacity] duration-700 ease-spotlight sm:flex"
+      style={{
+        transform: `translateY(${Math.abs(offset) * 14}px) rotate(${offset * 2.2}deg)`,
+        opacity: 0.22 + 0.1 * (3 - Math.abs(offset)),
+      }}
+    >
+      <span className="flex flex-1 flex-col justify-between p-3 transition-colors duration-700" style={{ backgroundColor: colors.background, color: colors.foreground }}>
+        <span className="text-[34px] leading-none transition-colors duration-700" style={{ fontFamily: resolveFontStack(typography.families.display) }}>
+          Aa
+        </span>
+        <span className="text-[10px] leading-tight opacity-70">{profile.label}</span>
+      </span>
+      <span className="flex h-9">
+        {[colors.primary, colors.secondary, colors.accent, colors.foreground].map((hex, index) => (
+          <span key={index} className="flex-1 transition-colors duration-700" style={{ backgroundColor: hex }} />
+        ))}
+      </span>
+    </span>
+  );
+}
 
 export function EmptyBench() {
   const loadSample = useTokenStore((state) => state.loadSample);
   const isBusy = useTokenStore(selectIsBusy);
+  const [cycle, setCycle] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setInterval(() => setCycle((value) => value + 1), CYCLE_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLoad = (event: MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -24,16 +63,12 @@ export function EmptyBench() {
   return (
     <section className="plate mt-8">
       <div className="relative grid place-items-center overflow-hidden px-6 pb-16 pt-20 text-center">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center gap-7 opacity-70">
-          {[-3, -2, -1, 0, 1, 2, 3].map((offset) => (
-            <span
-              key={offset}
-              className="hidden h-[220px] w-[160px] shrink-0 border border-dashed border-hairline-strong sm:block"
-              style={{ transform: `translateY(${Math.abs(offset) * 12}px) rotate(${offset * 2}deg)` }}
-            />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center gap-6">
+          {CARD_OFFSETS.map((offset) => (
+            <DriftingCard key={offset} offset={offset} cycle={cycle} />
           ))}
         </div>
-        <div className="relative bg-carbon/85 px-8 py-6">
+        <div className="relative border border-hairline bg-carbon/90 px-8 py-7 backdrop-blur-sm">
           <RegistrationMark size={42} className={`mx-auto text-signal ${isBusy ? "animate-spin [animation-duration:2.4s]" : ""}`} />
           <p className="label mt-6 text-signal">{isBusy ? "Specimen incoming" : "Bench is clear"}</p>
           <h2
@@ -44,7 +79,7 @@ export function EmptyBench() {
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[14px] text-ink-dim">
             Swatch reads the styles a page actually computes and resolves them into a design system you can inspect,
-            tune and export.
+            tune, compare and export.
           </p>
           <button type="button" onClick={handleLoad} disabled={isBusy} className="bracket-button mt-8 text-[12.5px]">
             Load Sample Extraction

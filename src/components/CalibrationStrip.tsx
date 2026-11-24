@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import { contrastGrade, contrastRatio, toOklch } from "@/lib/color";
-import { selectColors, selectPalette, useTokenStore } from "@/store/useTokenStore";
+import { selectActiveColors, selectPalette, useTokenStore } from "@/store/useTokenStore";
+import type { SemanticColorKey } from "@/types/tokens";
 
 const WEDGE_STEPS = 21;
 const WEDGE = Array.from({ length: WEDGE_STEPS }, (_, step) => `oklch(${(step / (WEDGE_STEPS - 1)).toFixed(3)} 0 0)`);
@@ -10,7 +11,8 @@ const NEEDLE_SLOTS = 12;
 
 export function CalibrationStrip() {
   const palette = useTokenStore(selectPalette);
-  const colors = useTokenStore(selectColors);
+  const colors = useTokenStore(selectActiveColors);
+  const liftContrast = useTokenStore((state) => state.liftContrast);
 
   const needles = useMemo(
     () => (palette ?? []).map((entry) => ({ hex: entry.hex, lightness: toOklch(entry.hex).l })),
@@ -18,15 +20,16 @@ export function CalibrationStrip() {
   );
   const pairs = useMemo(() => {
     if (!colors) return [];
-    const definitions: [label: string, ink: string, ground: string][] = [
-      ["Foreground on background", colors.foreground, colors.background],
-      ["Muted on background", colors.muted, colors.background],
-      ["Primary on background", colors.primary, colors.background],
-      ["Label on primary", colors.primaryForeground, colors.primary],
+    const definitions: [label: string, key: SemanticColorKey, ground: string][] = [
+      ["Foreground on background", "foreground", colors.background],
+      ["Muted on background", "muted", colors.background],
+      ["Primary on background", "primary", colors.background],
+      ["Label on primary", "primaryForeground", colors.primary],
     ];
-    return definitions.map(([label, ink, ground]) => {
+    return definitions.map(([label, key, ground]) => {
+      const ink = colors[key];
       const ratio = contrastRatio(ink, ground);
-      return { label, ink, ground, ratio, grade: contrastGrade(ratio) };
+      return { label, key, ink, ground, ratio, grade: contrastGrade(ratio) };
     });
   }, [colors]);
   const anchors = useMemo(() => {
@@ -99,6 +102,15 @@ export function CalibrationStrip() {
                 Aa
               </span>
               <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-dim">{pair.label}</span>
+              {pair.ratio < 4.5 ? (
+                <button
+                  type="button"
+                  onClick={() => liftContrast(pair.key)}
+                  className="label whitespace-nowrap text-[9.5px] text-signal underline-offset-4 hover:underline"
+                >
+                  Lift
+                </button>
+              ) : null}
               <span className="readout text-ink">{pair.ratio.toFixed(2)}:1</span>
               <span
                 className={`label w-[76px] whitespace-nowrap border px-1.5 py-1 text-center text-[9.5px] ${

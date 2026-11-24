@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import type { DesignSystemTokens, MeasureStep, ShadowStep, TypeStep } from "@/types/tokens";
+import type { DesignSystemTokens, MeasureStep, SemanticColors, ShadowStep, TypeStep } from "@/types/tokens";
+import { synthesizeHover } from "./stateRoles";
 import { SEMANTIC_COLOR_KEYS } from "@/types/tokens";
 
 type RadiusRole = "control" | "container" | "pill";
@@ -60,8 +61,9 @@ function typeVariables(prefix: string, step: TypeStep, tokens: DesignSystemToken
   };
 }
 
-export function toStageVariables(tokens: DesignSystemTokens): CSSProperties {
-  const { colors, typography, spacing, radii, shadows } = tokens;
+export function toStageVariables(tokens: DesignSystemTokens, colors: SemanticColors = tokens.colors): CSSProperties {
+  const { typography, spacing, radii, shadows } = tokens;
+  const isBase = colors === tokens.colors;
   const type = pickStageType(typography.steps);
   const variables: Record<string, string> = {
     "--sg-font-body": resolveFontStack(typography.families.body),
@@ -72,6 +74,8 @@ export function toStageVariables(tokens: DesignSystemTokens): CSSProperties {
     "--sg-radius-pill": `${pickRadius(radii, "pill")}px`,
     "--sg-shadow-low": pickShadow(shadows, "low"),
     "--sg-shadow-high": pickShadow(shadows, "high"),
+    "--sg-primary-hover": isBase ? tokens.states.primaryHover : synthesizeHover(colors.primary, colors.background),
+    "--sg-ring": isBase ? tokens.states.focusRing : colors.primary,
     "--sg-space-xs": `${pickSpace(spacing.steps, 6)}px`,
     "--sg-space-sm": `${pickSpace(spacing.steps, 10)}px`,
     "--sg-space-md": `${pickSpace(spacing.steps, 16)}px`,

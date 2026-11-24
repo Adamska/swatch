@@ -2,7 +2,8 @@
 
 import { memo } from "react";
 import { pickReadable } from "@/lib/color";
-import { selectRadii, selectShadows, useTokenStore } from "@/store/useTokenStore";
+import { selectActiveColors, selectRadii, selectShadows, useTokenStore } from "@/store/useTokenStore";
+import { focusHandlers } from "@/store/useViewStore";
 import type { MeasureStep } from "@/types/tokens";
 
 const RadiusSpecimen = memo(function RadiusSpecimen({ step, index }: { step: MeasureStep; index: number }) {
@@ -10,7 +11,10 @@ const RadiusSpecimen = memo(function RadiusSpecimen({ step, index }: { step: Mea
   const isPill = step.px >= 999;
 
   return (
-    <li className="bg-carbon px-4 py-4">
+    <li
+      className="bg-carbon px-4 py-4"
+      {...focusHandlers({ kind: "radius", value: String(step.px), label: `Radius ${step.name} · ${isPill ? "full" : `${step.px} px`}` })}
+    >
       <div className="flex items-baseline justify-between">
         <span className="label text-signal">{step.name}</span>
         <span className="readout text-ink">{isPill ? "full" : `${step.px} px`}</span>
@@ -47,9 +51,10 @@ const RadiusSpecimen = memo(function RadiusSpecimen({ step, index }: { step: Mea
 export function RadiiShadows() {
   const radii = useTokenStore(selectRadii);
   const shadows = useTokenStore(selectShadows);
-  const background = useTokenStore((state) => state.tokens?.colors.background);
-  const surface = useTokenStore((state) => state.tokens?.colors.surface);
-  const border = useTokenStore((state) => state.tokens?.colors.border);
+  const colors = useTokenStore(selectActiveColors);
+  const background = colors?.background;
+  const surface = colors?.surface;
+  const border = colors?.border;
   if (!radii || !shadows) return null;
   const captionInk = pickReadable(background ?? "#07080b", ["#0b0c0f", "#f7f7f5"]);
 

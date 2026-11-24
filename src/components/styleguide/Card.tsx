@@ -9,7 +9,7 @@ interface CardProps {
 
 export function Card({ title, aside, children }: CardProps) {
   return (
-    <article className={styles.card}>
+    <article className={styles.card} data-redline="Card">
       <header className={styles.cardHeader}>
         <h4 className={styles.cardTitle}>{title}</h4>
         {aside}

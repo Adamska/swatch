@@ -1,11 +1,19 @@
+import { resolveAltColors } from "@/lib/schemes";
 import type { DesignSystemTokens, SemanticColorKey } from "@/types/tokens";
+
+export type SchemeSlot = "base" | "alt";
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const tidy = (value: number) => Math.round(value * 100) / 100;
 
-export function withColor(tokens: DesignSystemTokens, key: SemanticColorKey, hex: string): DesignSystemTokens {
-  if (tokens.colors[key] === hex) return tokens;
-  return { ...tokens, colors: { ...tokens.colors, [key]: hex } };
+export function withColor(tokens: DesignSystemTokens, slot: SchemeSlot, key: SemanticColorKey, hex: string): DesignSystemTokens {
+  if (slot === "base") {
+    if (tokens.colors[key] === hex) return tokens;
+    return { ...tokens, colors: { ...tokens.colors, [key]: hex } };
+  }
+  const current = resolveAltColors(tokens);
+  if (current[key] === hex) return tokens;
+  return { ...tokens, altColors: { ...current, [key]: hex }, altSource: "edited" };
 }
 
 export function withTypeSize(tokens: DesignSystemTokens, index: number, sizePx: number): DesignSystemTokens {

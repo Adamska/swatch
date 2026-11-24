@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { selectSpacing, useTokenStore } from "@/store/useTokenStore";
+import { focusHandlers } from "@/store/useViewStore";
 import type { MeasureStep } from "@/types/tokens";
 
 const TRACK_PX = 320;
@@ -16,7 +17,10 @@ const CaliperRow = memo(function CaliperRow({ step, index }: { step: MeasureStep
   const reading = Math.min(step.px, TRACK_PX);
 
   return (
-    <li className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-x-4 border-t border-hairline px-4 py-2.5 sm:grid-cols-[52px_minmax(0,1fr)_132px]">
+    <li
+      className="grid grid-cols-[52px_minmax(0,1fr)] items-center gap-x-4 border-t border-hairline px-4 py-2.5 sm:grid-cols-[52px_minmax(0,1fr)_132px]"
+      {...focusHandlers({ kind: "space", value: String(step.px), label: `Spacing ${step.name} · ${trim(step.px)} px` })}
+    >
       <span className="readout text-signal">{step.name}</span>
       <div className="relative h-8 max-w-full" style={{ width: TRACK_PX }}>
         <div className="absolute inset-0 border-l border-ink" style={{ background: MAIN_SCALE }} />

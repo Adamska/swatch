@@ -1,51 +1,20 @@
 import { create } from "zustand";
+import { rememberCapture } from "@/lib/recentCaptures";
 import { findSampleProfile, SAMPLE_PROFILES } from "@/lib/samples";
-import type { ExportFormat } from "@/lib/tailwindExporter";
 import { normalizeDeterministic } from "@/lib/tokenNormalizer";
 import {
   DesignSystemTokensSchema,
   type DesignSystemTokens,
-  type Evidence,
   type ExtractionSource,
   type RawExtraction,
-  type SemanticColorKey,
 } from "@/types/tokens";
-import { streamExtraction, type ProgressLine } from "./extractionClient";
-import { withColor, withRadius, withSpacing, withTypeSize } from "./tokenEdits";
+import { activeColorsOf, createEditActions } from "./editActions";
+import { streamExtraction } from "./extractionClient";
+import { breakGesture, EMPTY_HISTORY } from "./history";
+import type { SpotlightOrigin, TokenState } from "./storeTypes";
 
-export type StudioStatus = "idle" | "extracting" | "normalizing" | "ready" | "error";
-export type StyleguideTab = "color" | "type" | "measure";
-
-export interface SpotlightOrigin {
-  x: number;
-  y: number;
-}
-
-interface TokenState {
-  status: StudioStatus;
-  error: string | null;
-  notice: string | null;
-  source: ExtractionSource | null;
-  evidence: Evidence | null;
-  progress: ProgressLine[];
-  baseline: DesignSystemTokens | null;
-  tokens: DesignSystemTokens | null;
-  systemKey: number;
-  isEdited: boolean;
-  activeSampleId: string | null;
-  activeTab: StyleguideTab;
-  exportFormat: ExportFormat;
-  spotlight: SpotlightOrigin;
-  loadSample: (id: string, origin?: SpotlightOrigin) => void;
-  inspect: (url: string, origin?: SpotlightOrigin) => Promise<void>;
-  setColor: (key: SemanticColorKey, hex: string) => void;
-  setTypeSize: (index: number, sizePx: number) => void;
-  setSpacing: (index: number, px: number) => void;
-  setRadius: (index: number, px: number) => void;
-  resetEdits: () => void;
-  setActiveTab: (tab: StyleguideTab) => void;
-  setExportFormat: (format: ExportFormat) => void;
-}
+export type { PinnedSystem, SpotlightOrigin, StudioStatus, StyleguideTab } from "./storeTypes";
+export { activeColorsOf };
 
 const sampleTokenCache = new Map<string, DesignSystemTokens>();
 let activeRequest: AbortController | null = null;
@@ -60,57 +29,44 @@ export function getSampleTokens(id: string): DesignSystemTokens | null {
   return tokens;
 }
 
-async function postJson(path: string, body: unknown, signal: AbortSignal): Promise<Record<string, unknown>> {
-  const response = await fetch(path, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-    signal,
-  });
-  const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!response.ok) {
-    const detail = payload.error as { message?: string } | undefined;
-    throw new Error(detail?.message ?? `Request failed with status ${response.status}.`);
-  }
-  return payload;
-}
-
 export const useTokenStore = create<TokenState>((set, get) => {
-  const present = (tokens: DesignSystemTokens, source: ExtractionSource, origin?: SpotlightOrigin) =>
+  const present = (tokens: DesignSystemTokens, source: ExtractionSource, origin?: SpotlightOrigin) => {
+    breakGesture();
     set((state) => ({
       tokens,
       baseline: tokens,
       source,
       isEdited: false,
       error: null,
+      scheme: "base",
+      ...EMPTY_HISTORY,
       systemKey: state.systemKey + 1,
       spotlight: origin ?? state.spotlight,
     }));
-
-  const edit = (apply: (tokens: DesignSystemTokens) => DesignSystemTokens) =>
-    set((state) => {
-      if (!state.tokens) return state;
-      const tokens = apply(state.tokens);
-      return tokens === state.tokens ? state : { tokens, isEdited: true };
-    });
+  };
 
   const refineWithModel = async (extraction: RawExtraction, signal: AbortSignal) => {
-    const payload = await postJson("/api/normalize", { extraction }, signal);
+    const response = await fetch("/api/normalize", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ extraction }),
+      signal,
+    });
+    const payload = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     const refined = DesignSystemTokensSchema.safeParse(payload.tokens);
-    const notice = typeof payload.fallbackReason === "string" ? payload.fallbackReason : null;
     if (refined.success && refined.data.meta.method === "ai" && !get().isEdited) {
       present(refined.data, extraction.source);
     }
-    set({ notice });
+    set({ notice: typeof payload.fallbackReason === "string" ? payload.fallbackReason : null });
   };
 
   return {
     status: "idle",
     error: null,
     notice: null,
+    progress: [],
     source: null,
     evidence: null,
-    progress: [],
     baseline: null,
     tokens: null,
     systemKey: 0,
@@ -119,6 +75,9 @@ export const useTokenStore = create<TokenState>((set, get) => {
     activeTab: "color",
     exportFormat: "tailwind",
     spotlight: { x: 50, y: 30 },
+    scheme: "base",
+    ...EMPTY_HISTORY,
+    reference: null,
 
     loadSample: (id, origin) => {
       const profile = findSampleProfile(id) ?? SAMPLE_PROFILES[0];
@@ -142,7 +101,10 @@ export const useTokenStore = create<TokenState>((set, get) => {
         present(normalizeDeterministic(extraction), extraction.source, origin);
         set({ status: "normalizing", activeSampleId: null, evidence });
         await refineWithModel(extraction, request.signal).catch(() => undefined);
-        if (!request.signal.aborted) set({ status: "ready" });
+        if (request.signal.aborted) return;
+        set({ status: "ready" });
+        const { tokens, source } = get();
+        if (tokens && source) void rememberCapture(tokens, source).catch(() => undefined);
       } catch (error) {
         if (request.signal.aborted) return;
         const message = error instanceof Error ? error.message : "Extraction failed.";
@@ -150,23 +112,32 @@ export const useTokenStore = create<TokenState>((set, get) => {
       }
     },
 
-    setColor: (key, hex) => edit((tokens) => withColor(tokens, key, hex)),
-    setTypeSize: (index, sizePx) => edit((tokens) => withTypeSize(tokens, index, sizePx)),
-    setSpacing: (index, px) => edit((tokens) => withSpacing(tokens, index, px)),
-    setRadius: (index, px) => edit((tokens) => withRadius(tokens, index, px)),
-    resetEdits: () => set((state) => (state.baseline ? { tokens: state.baseline, isEdited: false } : state)),
+    restore: ({ tokens, source }, origin) => {
+      activeRequest?.abort();
+      present(tokens, source, origin);
+      set({ status: "ready", notice: null, activeSampleId: null, evidence: null, progress: [] });
+    },
+
+    ...createEditActions(set, get),
+    setScheme: (scheme) => set({ scheme }),
+    pinReference: () => {
+      const { tokens, source } = get();
+      if (tokens && source) set({ reference: { tokens, source }, activeTab: "compare" });
+    },
+    clearReference: () =>
+      set((state) => ({ reference: null, activeTab: state.activeTab === "compare" ? "color" : state.activeTab })),
     setActiveTab: (activeTab) => set({ activeTab }),
     setExportFormat: (exportFormat) => set({ exportFormat }),
   };
 });
 
 export const selectTokens = (state: TokenState) => state.tokens;
-export const selectColors = (state: TokenState) => state.tokens?.colors ?? null;
+export const selectActiveColors = (state: TokenState) =>
+  state.tokens ? activeColorsOf(state.tokens, state.scheme) : null;
 export const selectPalette = (state: TokenState) => state.tokens?.palette ?? null;
 export const selectTypography = (state: TokenState) => state.tokens?.typography ?? null;
 export const selectSpacing = (state: TokenState) => state.tokens?.spacing ?? null;
 export const selectRadii = (state: TokenState) => state.tokens?.radii ?? null;
 export const selectShadows = (state: TokenState) => state.tokens?.shadows ?? null;
 export const selectMeta = (state: TokenState) => state.tokens?.meta ?? null;
-export const selectIsBusy = (state: TokenState) =>
-  state.status === "extracting" || state.status === "normalizing";
+export const selectIsBusy = (state: TokenState) => state.status === "extracting" || state.status === "normalizing";
