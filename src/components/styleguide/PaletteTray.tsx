@@ -36,7 +36,7 @@ export function PaletteTray() {
                 type="button"
                 draggable
                 aria-pressed={isArmed}
-                aria-label={`${entry.hex}, ${(entry.share * 100).toFixed(1)} percent ${entry.usage}`}
+                aria-label={`Select ${entry.hex} to assign it, ${(entry.share * 100).toFixed(1)} percent ${entry.usage}`}
                 onClick={() => setArmedHex(isArmed ? null : entry.hex)}
                 onDragStart={(event) => {
                   event.dataTransfer.setData(PALETTE_MIME, entry.hex);
