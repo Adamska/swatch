@@ -48,15 +48,44 @@ function toOklab(hex: string): Triple {
   ];
 }
 
-function fromOklab([lightness, a, b]: Triple): string {
+function oklabToLinear([lightness, a, b]: Triple): Triple {
   const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  return rgbToHex([
-    toGamma(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
-    toGamma(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
-    toGamma(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
-  ]);
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+}
+
+function fromOklab(lab: Triple): string {
+  return rgbToHex(oklabToLinear(lab).map(toGamma) as Triple);
+}
+
+const polarToLab = ({ l, c, h }: Oklch): Triple => {
+  const radians = (h * Math.PI) / 180;
+  return [clamp01(l), c * Math.cos(radians), c * Math.sin(radians)];
+};
+
+export function isInGamut(color: Oklch): boolean {
+  return oklabToLinear(polarToLab(color)).every((channel) => channel >= -0.0005 && channel <= 1.0005);
+}
+
+export function fromOklchInGamut(color: Oklch): string {
+  if (isInGamut(color)) return fromOklch(color);
+  let low = 0;
+  let high = color.c;
+  for (let step = 0; step < 14; step += 1) {
+    const mid = (low + high) / 2;
+    if (isInGamut({ ...color, c: mid })) low = mid;
+    else high = mid;
+  }
+  return fromOklch({ ...color, c: low });
+}
+
+export function hexToRgbUnit(hex: string): Triple {
+  return hexToRgb(hex).map((channel) => channel / 255) as Triple;
 }
 
 export function toOklch(hex: string): Oklch {
@@ -65,9 +94,8 @@ export function toOklch(hex: string): Oklch {
   return { l, c: Math.hypot(a, b), h: hue < 0 ? hue + 360 : hue };
 }
 
-export function fromOklch({ l, c, h }: Oklch): string {
-  const radians = (h * Math.PI) / 180;
-  return fromOklab([clamp01(l), c * Math.cos(radians), c * Math.sin(radians)]);
+export function fromOklch(color: Oklch): string {
+  return fromOklab(polarToLab(color));
 }
 
 export function deltaE(first: string, second: string): number {

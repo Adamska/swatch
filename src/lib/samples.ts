@@ -1,4 +1,4 @@
-import { action, defineProfile, elevations, face, fill, ink, measures, rule, type SampleProfile } from "./sampleBuilders";
+import { action, defineProfile, elevations, face, fill, hover, ink, measures, rule, type SampleProfile } from "./sampleBuilders";
 
 const SERIF = '"Fraunces Variable", "Iowan Old Style", Georgia, serif';
 const BOOK = '"Source Serif 4", "Iowan Old Style", Georgia, serif';
@@ -40,6 +40,7 @@ const halcyon = defineProfile({
       ["rgba(29, 26, 23, 0.1) 0px 1px 0px 0px", 11],
       ["rgba(29, 26, 23, 0.14) 0px 14px 32px -14px", 4],
     ]),
+    states: [hover("#c8402a", "#a93422", "#1f4f4b"), hover("#1f4f4b", "#173c39", "#1f4f4b")],
   },
 });
 
@@ -79,6 +80,14 @@ const northwind = defineProfile({
       ["rgba(11, 31, 51, 0.08) 0px 4px 12px -2px, rgba(11, 31, 51, 0.04) 0px 2px 4px -2px", 18],
       ["rgba(11, 31, 51, 0.16) 0px 24px 48px -12px", 5],
     ]),
+    states: [hover("#0a5cff", "#004ae0", "#7aa7ff"), hover("#f4f6fa", "#e8edf5", "#7aa7ff")],
+    darkColors: [
+      fill("#0a1420", 1.9), fill("#111d2c", 0.86), fill("#18273a", 0.2),
+      ink("#e8eef6", 38.2), ink("#91a1b6", 17.5), ink("#5b9bff", 4.4), ink("#0a1420", 3.1),
+      ink("#2fd3a0", 1.2), ink("#f0b54a", 0.7), ink("#ff6b6e", 0.6),
+      rule("#22344a", 41), rule("#2c4260", 9.5),
+      action("#4d8dff", 15.3), action("#18273a", 6.2), action("#2fd3a0", 2.8), action("#a77bff", 1.6),
+    ],
   },
 });
 
@@ -115,6 +124,7 @@ const kiln = defineProfile({
       ["rgba(59, 42, 32, 0.08) 0px 2px 6px 0px", 14],
       ["rgba(59, 42, 32, 0.14) 0px 18px 40px -16px", 7],
     ]),
+    states: [hover("#b5542f", "#9a4524", null)],
   },
 });
 
@@ -152,6 +162,7 @@ const graphite = defineProfile({
       ["rgba(180, 244, 97, 0.18) 0px 0px 0px 1px, rgba(180, 244, 97, 0.22) 0px 0px 24px -4px", 6],
       ["rgba(0, 0, 0, 0.6) 0px 24px 60px -20px", 4],
     ]),
+    states: [hover("#b4f461", "#c8ff80", "#56d4ff")],
   },
 });
 

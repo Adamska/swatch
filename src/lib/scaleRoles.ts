@@ -46,6 +46,7 @@ function summarizeStep(name: string, samples: TypeSample[], sizePx: number): Typ
   return {
     name,
     sizePx,
+    fluidMinPx: null,
     lineHeight: tidy(Math.min(3, Math.max(0.8, roundTo(average((sample) => sample.lineHeight), 0.05)))),
     weight: Math.min(900, Math.max(100, roundTo(weight, 10))),
     letterSpacingEm: tidy(Math.min(0.5, Math.max(-0.2, roundTo(average((sample) => sample.letterSpacingEm), 0.005)))),
@@ -79,7 +80,7 @@ export function deriveTypography(samples: TypeSample[]): Typography {
   const base = [...(readable.length > 0 ? readable : groups)].sort((a, b) => baseScore(b) - baseScore(a))[0];
   if (!base) {
     const synthetic = (name: string, sizePx: number, lineHeight: number, weight: number): TypeStep =>
-      ({ name, sizePx, lineHeight, weight, letterSpacingEm: 0, family: sizePx > 20 ? "display" : "body" });
+      ({ name, sizePx, fluidMinPx: null, lineHeight, weight, letterSpacingEm: 0, family: sizePx > 20 ? "display" : "body" });
     return { families, steps: [synthetic("sm", 14, 1.5, 400), synthetic("base", 16, 1.6, 400), synthetic("lg", 20, 1.4, 500), synthetic("xl", 28, 1.2, 600)] };
   }
 

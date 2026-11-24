@@ -4,12 +4,13 @@ import type { ExportFormat } from "@/lib/tailwindExporter";
 import { normalizeDeterministic } from "@/lib/tokenNormalizer";
 import {
   DesignSystemTokensSchema,
-  RawExtractionSchema,
   type DesignSystemTokens,
+  type Evidence,
   type ExtractionSource,
   type RawExtraction,
   type SemanticColorKey,
 } from "@/types/tokens";
+import { streamExtraction, type ProgressLine } from "./extractionClient";
 import { withColor, withRadius, withSpacing, withTypeSize } from "./tokenEdits";
 
 export type StudioStatus = "idle" | "extracting" | "normalizing" | "ready" | "error";
@@ -25,6 +26,8 @@ interface TokenState {
   error: string | null;
   notice: string | null;
   source: ExtractionSource | null;
+  evidence: Evidence | null;
+  progress: ProgressLine[];
   baseline: DesignSystemTokens | null;
   tokens: DesignSystemTokens | null;
   systemKey: number;
@@ -106,6 +109,8 @@ export const useTokenStore = create<TokenState>((set, get) => {
     error: null,
     notice: null,
     source: null,
+    evidence: null,
+    progress: [],
     baseline: null,
     tokens: null,
     systemKey: 0,
@@ -121,20 +126,21 @@ export const useTokenStore = create<TokenState>((set, get) => {
       if (!tokens) return;
       activeRequest?.abort();
       present(tokens, profile.extraction.source, origin);
-      set({ status: "ready", notice: null, activeSampleId: profile.id });
+      set({ status: "ready", notice: null, activeSampleId: profile.id, evidence: null, progress: [] });
     },
 
     inspect: async (url, origin) => {
       activeRequest?.abort();
       const request = new AbortController();
       activeRequest = request;
-      set({ status: "extracting", error: null, notice: null });
+      set({ status: "extracting", error: null, notice: null, progress: [] });
 
       try {
-        const payload = await postJson("/api/extract", { url }, request.signal);
-        const extraction = RawExtractionSchema.parse(payload.extraction);
+        const { extraction, evidence } = await streamExtraction(url, request.signal, (line) =>
+          set((state) => ({ progress: [...state.progress, line] })),
+        );
         present(normalizeDeterministic(extraction), extraction.source, origin);
-        set({ status: "normalizing", activeSampleId: null });
+        set({ status: "normalizing", activeSampleId: null, evidence });
         await refineWithModel(extraction, request.signal).catch(() => undefined);
         if (!request.signal.aborted) set({ status: "ready" });
       } catch (error) {

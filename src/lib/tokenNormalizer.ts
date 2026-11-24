@@ -6,14 +6,18 @@ import {
   ShadowStepSchema,
   SpacingSchema,
   TypographySchema,
-  type AiTokenDraft,
   type DesignSystemTokens,
   type RawExtraction,
+  type TypeStep,
 } from "@/types/tokens";
+import type { AiTokenDraft } from "@/types/aiDraft";
 import { z } from "zod";
 import { normalizeHex } from "./color";
 import { deriveColors } from "./colorRoles";
+import { applyFluidType } from "./fluidType";
 import { deriveRadii, deriveShadows, deriveSpacing, deriveTypography } from "./scaleRoles";
+import { isDistinctScheme } from "./schemes";
+import { deriveStates } from "./stateRoles";
 
 const TITLE_SEPARATORS = /\s+[—–|·:-]\s+|:\s+/;
 
@@ -25,6 +29,10 @@ function deriveName(raw: RawExtraction): string {
 
 export function normalizeDeterministic(raw: RawExtraction): DesignSystemTokens {
   const { colors, palette } = deriveColors(raw.colors);
+  const alternate = raw.darkColors && raw.darkColors.length > 0 ? deriveColors(raw.darkColors).colors : null;
+  const altColors = alternate && isDistinctScheme(colors, alternate) ? alternate : null;
+  const typography = deriveTypography(raw.typography);
+
   return DesignSystemTokensSchema.parse({
     meta: {
       name: deriveName(raw),
@@ -34,8 +42,11 @@ export function normalizeDeterministic(raw: RawExtraction): DesignSystemTokens {
       generatedAt: new Date().toISOString(),
     },
     colors,
+    altColors,
+    altSource: altColors ? "extracted" : "synthesized",
+    states: deriveStates(raw.states, colors),
     palette,
-    typography: deriveTypography(raw.typography),
+    typography: { ...typography, steps: applyFluidType(typography.steps, raw.mobileTypography) },
     spacing: deriveSpacing(raw.spacing),
     radii: deriveRadii(raw.radii),
     shadows: deriveShadows(raw.shadows),
@@ -83,10 +94,12 @@ export function reconcileDraft(
   const colors = Object.fromEntries(
     SEMANTIC_COLOR_KEYS.map((key) => [key, normalizeHex(draft.colors[key]) ?? baseline.colors[key]]),
   );
+  const fluidFor = (sizePx: number) =>
+    baseline.typography.steps.find((step: TypeStep) => Math.abs(step.sizePx - sizePx) <= 0.5)?.fluidMinPx ?? null;
   const typography = {
     families: draft.typography.families,
     steps: draft.typography.steps
-      .map((step) => ({ ...step, name: slug(step.name), weight: Math.round(step.weight) }))
+      .map((step) => ({ ...step, name: slug(step.name), weight: Math.round(step.weight), fluidMinPx: fluidFor(step.sizePx) }))
       .sort((a, b) => a.sizePx - b.sizePx),
   };
   const byPx = <T extends { name: string; px: number }>(steps: T[]) =>
@@ -96,6 +109,9 @@ export function reconcileDraft(
   return DesignSystemTokensSchema.parse({
     meta: { ...baseline.meta, name: name || baseline.meta.name, method: "ai", model, generatedAt: new Date().toISOString() },
     colors: accept(SemanticColorsSchema, colors, baseline.colors),
+    altColors: baseline.altColors,
+    altSource: baseline.altSource,
+    states: baseline.states,
     palette: baseline.palette,
     typography: accept(TypographySchema, typography, baseline.typography),
     spacing: accept(SpacingSchema, { ...draft.spacing, steps: byPx(draft.spacing.steps) }, baseline.spacing),

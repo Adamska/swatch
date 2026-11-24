@@ -5,6 +5,7 @@ export type ExtractionErrorCode =
   | "upstream_status"
   | "timeout"
   | "busy"
+  | "rate_limited"
   | "browser_unavailable";
 
 const HTTP_STATUS: Record<ExtractionErrorCode, number> = {
@@ -14,6 +15,7 @@ const HTTP_STATUS: Record<ExtractionErrorCode, number> = {
   upstream_status: 502,
   timeout: 504,
   busy: 429,
+  rate_limited: 429,
   browser_unavailable: 503,
 };
 

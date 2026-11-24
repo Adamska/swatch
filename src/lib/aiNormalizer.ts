@@ -1,6 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
-import { AiTokenDraftSchema, type DesignSystemTokens, type RawExtraction } from "@/types/tokens";
+import { AiTokenDraftSchema } from "@/types/aiDraft";
+import type { DesignSystemTokens, RawExtraction } from "@/types/tokens";
 import { reconcileDraft, summarizeForModel } from "./tokenNormalizer";
 
 const DEFAULT_MODEL = "gpt-5.4-mini";
