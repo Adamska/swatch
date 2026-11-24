@@ -21,7 +21,7 @@ const halcyon = defineProfile({
       ink("#1d1a17", 31.4), ink("#6f665b", 9.8), ink("#f4efe6", 2.6), ink("#c8402a", 1.9),
       ink("#2f7d5c", 0.3), ink("#b3261e", 0.2),
       rule("#d8cebd", 14.5), rule("#1d1a17", 3), rule("#1d1a17", 2.5, 0.2),
-      action("#c8402a", 7.4), action("#1f4f4b", 2.1), action("#1d1a17", 1.4), action("#e2b34a", 0.6),
+      action("#c8402a", 7.4), action("#1f4f4b", 3.2), action("#1d1a17", 1.4), action("#e2b34a", 0.6),
     ],
     typography: [
       face("heading", SERIF, 76, 560, 1.02, 1.4, -0.025),
@@ -54,20 +54,20 @@ const northwind = defineProfile({
   samples: {
     colors: [
       fill("#ffffff", 1.9), fill("#f4f6fa", 0.86), fill("#0b1f33", 0.24), fill("#e8f0ff", 0.11),
-      fill("#e6f7f1", 0.04), fill("#fdf1dc", 0.03), fill("#fdeaea", 0.02),
+      fill("#e6f7f1", 0.04), fill("#fdf1dc", 0.03), fill("#fdeaea", 0.02), fill("#8a3ffc", 0.03),
       ink("#0b1f33", 38.2), ink("#55657a", 17.5), ink("#ffffff", 6.1), ink("#0a5cff", 4.4),
       ink("#0a8f6c", 1.2), ink("#b76e00", 0.7), ink("#d13438", 0.6),
       rule("#e2e8f0", 41), rule("#cbd5e1", 9.5), rule("#0a5cff", 2),
-      action("#0a5cff", 15.3), action("#f4f6fa", 6.2), action("#0b1f33", 2.4), action("#00b386", 1.8),
-      action("#d13438", 0.5),
+      action("#0a5cff", 15.3), action("#f4f6fa", 6.2), action("#0b1f33", 2.4), action("#00b386", 2.8),
+      action("#8a3ffc", 1.6), action("#d13438", 0.5),
     ],
     typography: [
       face("heading", GROTESK, 60, 650, 1.05, 1.2, -0.03),
       face("heading", GROTESK, 40, 640, 1.1, 2.8, -0.025),
       face("heading", GROTESK, 28, 620, 1.2, 7.4, -0.018),
       face("heading", GROTESK, 20, 600, 1.3, 14.1, -0.01),
-      face("body", GROTESK, 16, 400, 1.6, 52.7),
-      face("body", GROTESK, 14, 400, 1.5, 63.2),
+      face("body", GROTESK, 16, 400, 1.6, 61.7),
+      face("body", GROTESK, 14, 400, 1.5, 48.2),
       face("body", GROTESK, 12, 500, 1.4, 28.9, 0.01),
       face("control", GROTESK, 14, 550, 1.2, 24.4),
       face("code", MONO, 13, 400, 1.55, 6.3),
@@ -97,7 +97,7 @@ const kiln = defineProfile({
       ink("#3b2a20", 27.6), ink("#7a6657", 11.2), ink("#f8f2e9", 4.3), ink("#b5542f", 2.2),
       ink("#55703f", 0.4), ink("#a8321f", 0.3),
       rule("#dcc9b2", 16.5), rule("#3b2a20", 2, 0.25),
-      action("#b5542f", 9.6), action("#7d8c6a", 3.1), action("#3b2a20", 1.5), action("#d9a441", 1.1),
+      action("#b5542f", 9.6), action("#7d8c6a", 4.4), action("#3b2a20", 1.5), action("#d9a441", 1.1),
     ],
     typography: [
       face("heading", SERIF, 64, 420, 1.04, 1.3, -0.02),
