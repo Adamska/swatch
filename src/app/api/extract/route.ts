@@ -4,7 +4,7 @@ import { ExtractionError } from "@/lib/extractionError";
 import { clientKey, createRateLimiter } from "@/lib/rateLimit";
 import { extractStyles, type ExtractionResult } from "@/lib/scraper";
 import { createTtlCache } from "@/lib/ttlCache";
-import { parsePublicUrl } from "@/lib/urlGuard";
+import { createHostGuard, parsePublicUrl } from "@/lib/urlGuard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +30,9 @@ export async function POST(request: Request) {
 
   let cacheKey: string;
   try {
-    cacheKey = parsePublicUrl(parsed.data.url).href;
+    const target = parsePublicUrl(parsed.data.url);
+    await createHostGuard().assertPublicHost(target.hostname);
+    cacheKey = target.href;
   } catch (error) {
     if (error instanceof ExtractionError) return failure(error.code, error.message, error.status);
     throw error;
