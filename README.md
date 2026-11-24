@@ -180,7 +180,7 @@ Measured on the development machine: GitHub, Stripe, Tailwind CSS and Linear com
 - Tonal scales and the opposite scheme are memoized per color and per token set.
 - The export panel renders from a deferred copy of the tokens, so syntax highlighting never blocks a drag.
 
-Measured on a production build during a 120-step color drag: about 1 ms of synchronous work per edit and a 16.7 ms median frame.
+Measured on a production build during a 120-step color drag: about 1.7 ms of synchronous work per edit (2.2 ms at p95) and a 16.6 ms median frame.
 
 ## Testing
 
