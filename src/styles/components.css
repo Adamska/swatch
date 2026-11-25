@@ -10,12 +10,14 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    --grain-dot: color-mix(in oklab, var(--color-tint) 7.5%, transparent);
+    --grain-line: color-mix(in oklab, var(--color-tint) 3.2%, transparent);
     transition: --glow 900ms var(--ease-spotlight);
     background:
-      radial-gradient(120% 70% at 50% -10%, color-mix(in oklab, var(--glow) 20%, transparent), transparent 62%),
-      radial-gradient(circle at center, rgba(255, 255, 255, 0.075) 0.6px, transparent 1px) 0 0 / 24px 24px,
-      linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px) 0 0 / 100% 120px,
-      linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px) 0 0 / 120px 100%;
+      radial-gradient(120% 70% at 50% -10%, color-mix(in oklab, var(--glow) var(--glow-mix, 20%), transparent), transparent 62%),
+      radial-gradient(circle at center, var(--grain-dot) 0.6px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(var(--grain-line) 1px, transparent 1px) 0 0 / 100% 120px,
+      linear-gradient(90deg, var(--grain-line) 1px, transparent 1px) 0 0 / 120px 100%;
     mask-image: radial-gradient(140% 100% at 50% 0%, #000 55%, transparent 100%);
   }
 
@@ -38,11 +40,11 @@
   .plate {
     position: relative;
     border: 1px solid var(--color-hairline);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.008));
+    background: linear-gradient(180deg, var(--color-plate-top), var(--color-plate-bottom));
   }
 
   .plate::before {
-    --mark: rgba(255, 255, 255, 0.34);
+    --mark: color-mix(in oklab, var(--color-tint) 34%, transparent);
     content: "";
     position: absolute;
     inset: -7px;

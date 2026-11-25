@@ -49,7 +49,7 @@ export function StyleguideView() {
               aria-controls={`panel-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
               className={`label relative flex-1 shrink-0 whitespace-nowrap border-r border-hairline px-4 py-3.5 text-left transition-colors last:border-r-0 sm:flex-none sm:pr-8 ${
-                isActive ? "bg-white/[0.035] text-ink" : "text-ink-dim hover:text-ink"
+                isActive ? "bg-tint/[0.035] text-ink" : "text-ink-dim hover:text-ink"
               }`}
             >
               <span className={isActive ? "text-signal" : "text-ink-faint"}>{String.fromCharCode(65 + position)}</span>

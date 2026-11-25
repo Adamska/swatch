@@ -65,7 +65,7 @@ const ColorChip = memo(function ColorChip({ colorKey, order }: { colorKey: Seman
       onDragLeave={() => setIsOver(false)}
       onDrop={handleDrop}
       style={{ "--i": order } as CSSProperties}
-      className={`develop group relative border bg-carbon-raised shadow-[0_18px_28px_-22px_rgba(0,0,0,0.9)] transition-[transform,border-color] duration-150 ease-spotlight hover:-translate-y-0.5 has-[button:active]:translate-y-px has-[button:active]:scale-[0.985] ${
+      className={`develop group relative border bg-carbon-raised shadow-[0_18px_28px_-22px_var(--color-shade)] transition-[transform,border-color] duration-150 ease-spotlight hover:-translate-y-0.5 has-[button:active]:translate-y-px has-[button:active]:scale-[0.985] ${
         isOver ? "border-signal" : isTarget ? "border-dashed border-signal/60" : "border-hairline-strong"
       }`}
     >

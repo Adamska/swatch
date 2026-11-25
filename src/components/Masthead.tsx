@@ -1,6 +1,7 @@
 "use client";
 
 import { selectMeta, useTokenStore } from "@/store/useTokenStore";
+import { ThemeSwitch } from "./ThemeSwitch";
 import { RegistrationMark } from "./ui/RegistrationMark";
 
 function Readout({ label, value }: { label: string; value: string }) {
@@ -34,12 +35,15 @@ export function Masthead() {
         </div>
       </div>
 
-      <dl className="grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-4">
-        <Readout label="Source" value={source ? new URL(source.url).hostname : "No specimen"} />
-        <Readout label="Nodes sampled" value={source ? String(source.sampledNodes) : "—"} />
-        <Readout label="Capture" value={source ? `${(source.durationMs / 1000).toFixed(2)} s` : "—"} />
-        <Readout label={isEdited ? "Method · tuned" : "Method"} value={method} />
-      </dl>
+      <div className="flex flex-col items-start gap-5 sm:items-end">
+        <ThemeSwitch />
+        <dl className="grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-4">
+          <Readout label="Source" value={source ? new URL(source.url).hostname : "No specimen"} />
+          <Readout label="Nodes sampled" value={source ? String(source.sampledNodes) : "—"} />
+          <Readout label="Capture" value={source ? `${(source.durationMs / 1000).toFixed(2)} s` : "—"} />
+          <Readout label={isEdited ? "Method · tuned" : "Method"} value={method} />
+        </dl>
+      </div>
     </header>
   );
 }

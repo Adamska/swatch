@@ -114,7 +114,7 @@ export function SpectrumBar() {
         {loupe ? (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-[calc(100%+10px)] z-20 overflow-hidden rounded-full border border-hairline-strong shadow-[0_0_0_4px_#07080b,0_0_0_5px_rgba(255,255,255,0.2),0_18px_40px_-10px_rgba(0,0,0,0.8)]"
+            className="pointer-events-none absolute bottom-[calc(100%+10px)] z-20 overflow-hidden rounded-full border border-hairline-strong shadow-[0_0_0_4px_var(--color-carbon),0_0_0_5px_var(--color-hairline-strong),0_18px_40px_-10px_var(--color-shade)]"
             style={{
               left: loupe.x - LOUPE_SIZE / 2,
               width: LOUPE_SIZE,

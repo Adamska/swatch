@@ -12,8 +12,8 @@ const SEGMENT_CLASS: Record<CodeSegmentKind, string> = {
   comment: "text-ink-faint italic",
   string: "text-ink",
   number: "text-signal",
-  key: "text-[#9fb4c7]",
-  variable: "text-[#9fb4c7]",
+  key: "text-code-key",
+  variable: "text-code-key",
 };
 
 function download(format: ExportFormatInfo, contents: string) {
@@ -74,7 +74,7 @@ export function TailwindCodePanel() {
               aria-selected={isActive}
               onClick={() => setFormat(entry.id)}
               className={`label shrink-0 whitespace-nowrap border-r border-hairline px-4 py-3 transition-colors ${
-                isActive ? "bg-white/[0.035] text-ink shadow-[inset_0_-1px_0_var(--color-signal)]" : "text-ink-dim hover:text-ink"
+                isActive ? "bg-tint/[0.035] text-ink shadow-[inset_0_-1px_0_var(--color-signal)]" : "text-ink-dim hover:text-ink"
               }`}
             >
               {entry.label}

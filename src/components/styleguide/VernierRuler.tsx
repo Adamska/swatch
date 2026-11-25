@@ -7,7 +7,7 @@ import type { MeasureStep } from "@/types/tokens";
 
 const TRACK_PX = 320;
 const MAIN_SCALE =
-  "repeating-linear-gradient(90deg, rgba(255,255,255,0.42) 0 1px, transparent 1px 16px) 0 0 / 100% 9px no-repeat, repeating-linear-gradient(90deg, rgba(255,255,255,0.2) 0 1px, transparent 1px 4px) 0 0 / 100% 5px no-repeat";
+  "repeating-linear-gradient(90deg, color-mix(in oklab, var(--color-tint) 42%, transparent) 0 1px, transparent 1px 16px) 0 0 / 100% 9px no-repeat, repeating-linear-gradient(90deg, color-mix(in oklab, var(--color-tint) 20%, transparent) 0 1px, transparent 1px 4px) 0 0 / 100% 5px no-repeat";
 const VERNIER_SCALE = "repeating-linear-gradient(90deg, var(--color-signal) 0 1px, transparent 1px 3.6px)";
 const MAJOR_TICKS = Array.from({ length: TRACK_PX / 32 + 1 }, (_, tick) => tick * 32);
 const trim = (value: number) => String(Math.round(value * 1000) / 1000);

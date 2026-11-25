@@ -57,7 +57,7 @@
     circle,
     transparent 46%,
     color-mix(in oklab, var(--glow) 34%, transparent) 49%,
-    rgba(255, 255, 255, 0.16) 50%,
+    color-mix(in oklab, var(--color-tint) 16%, transparent) 50%,
     color-mix(in oklab, var(--glow) 18%, transparent) 51%,
     transparent 56%
   );

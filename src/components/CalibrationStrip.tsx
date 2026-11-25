@@ -55,7 +55,7 @@ export function CalibrationStrip() {
               <span
                 key={slot}
                 aria-hidden="true"
-                className="morph absolute -top-3 flex h-[38px] w-px -translate-x-1/2 flex-col items-center bg-ink/70 mix-blend-difference"
+                className="morph absolute -top-3 flex h-[38px] w-px -translate-x-1/2 flex-col items-center bg-white/70 mix-blend-difference"
                 style={{ left: `${(needle?.lightness ?? 0) * 100}%`, opacity: needle ? 1 : 0 }}
               >
                 <span

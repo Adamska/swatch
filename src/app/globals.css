@@ -12,6 +12,11 @@
   --color-hairline: rgba(255, 255, 255, 0.09);
   --color-hairline-strong: rgba(255, 255, 255, 0.2);
   --color-signal: #ff6a3d;
+  --color-tint: #ffffff;
+  --color-shade: rgba(0, 0, 0, 0.85);
+  --color-code-key: #9fb4c7;
+  --color-plate-top: rgba(255, 255, 255, 0.024);
+  --color-plate-bottom: rgba(255, 255, 255, 0.008);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
@@ -114,10 +119,29 @@
   --morph: 720ms;
 }
 
+:root[data-theme="light"] {
+  --color-carbon: #efece4;
+  --color-carbon-raised: #f7f5ef;
+  --color-ink: #16150f;
+  --color-ink-dim: #4f4d45;
+  --color-ink-faint: #6f6c62;
+  --color-hairline: rgba(28, 25, 16, 0.12);
+  --color-hairline-strong: rgba(28, 25, 16, 0.26);
+  --color-signal: #c9411a;
+  --color-tint: #1c1910;
+  --color-shade: rgba(58, 48, 28, 0.32);
+  --color-code-key: #3e5a75;
+  --color-plate-top: rgba(255, 255, 255, 0.62);
+  --color-plate-bottom: rgba(255, 255, 255, 0.34);
+  --glow-mix: 9%;
+  color-scheme: light;
+}
+
 html {
   color-scheme: dark;
   background: var(--color-carbon);
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  scrollbar-color: color-mix(in oklab, var(--color-tint) 16%, transparent) transparent;
+  transition: background-color 240ms ease;
 }
 
 body {

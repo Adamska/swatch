@@ -32,7 +32,7 @@ function FaceCard({ role, stack, optical }: { role: FontRole; stack: string; opt
         <p className="label">{role}</p>
         <span
           title={label}
-          className={`h-1.5 w-1.5 rounded-full ${status === "fallback" ? "bg-signal" : status === "loading" ? "animate-pulse bg-ink-faint" : "bg-[#7fd18b]"}`}
+          className={`h-1.5 w-1.5 rounded-full ${status === "fallback" ? "bg-signal" : status === "loading" ? "animate-pulse bg-ink-faint" : "bg-[#4fb36a]"}`}
         />
       </div>
       <p className="mt-2 text-[52px] leading-none text-ink" style={{ fontFamily: resolveFontStack(stack), fontOpticalSizing: optical ? "auto" : "none" }}>
@@ -62,8 +62,8 @@ const SpecimenRow = memo(function SpecimenRow({ step, index, stack, optical }: S
   const guides =
     metrics && baseline !== null
       ? [
-          { tag: "cap", offset: baseline - metrics.capHeight, tone: "border-white/30" },
-          { tag: "x", offset: baseline - metrics.xHeight, tone: "border-dashed border-white/30" },
+          { tag: "cap", offset: baseline - metrics.capHeight, tone: "border-tint/30" },
+          { tag: "x", offset: baseline - metrics.xHeight, tone: "border-dashed border-tint/30" },
           { tag: "base", offset: baseline, tone: "border-signal/70" },
         ]
       : [];
@@ -144,10 +144,10 @@ export function TypeSpecimenRack() {
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-hairline px-4 py-3">
         <p className="label flex items-center gap-4">
           <span className="flex items-center gap-1.5">
-            <span className="block w-4 border-t border-white/30" /> Cap height
+            <span className="block w-4 border-t border-tint/30" /> Cap height
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="block w-4 border-t border-dashed border-white/30" /> x-height
+            <span className="block w-4 border-t border-dashed border-tint/30" /> x-height
           </span>
           <span className="flex items-center gap-1.5">
             <span className="block w-4 border-t border-signal/70" /> Baseline
