@@ -2,6 +2,8 @@
 
 **Live demo:** [swatch-omega.vercel.app](https://swatch-omega.vercel.app)
 
+![Swatch extracting a design system from a website url](https://github.com/user-attachments/assets/b959f22b-7c20-4aa8-a066-29b6d071a3f5)
+
 Swatch inspects any public URL in headless Chromium, reads the styles the page actually computes, and resolves them into a design system: semantic colors in a light and a dark scheme, tonal scales, a fluid type scale, spacing, radii, shadows and interaction states. The result is an interactive styleguide with a live component stage, a capture of the source page that shows where every value was found, and exports for Tailwind v3, Tailwind v4, CSS variables, shadcn/ui and W3C Design Tokens.
 
 It works without any API key. When `OPENAI_API_KEY` is set, a model refines the token set through structured output; otherwise a deterministic perceptual clusterer does all the work locally.
