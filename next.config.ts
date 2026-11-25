@@ -5,7 +5,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["playwright", "playwright-core", "@sparticuz/chromium"],
   outputFileTracingIncludes: {
-    "/api/extract": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/api/extract": [
+      "./node_modules/@sparticuz/chromium/bin/**",
+      "./node_modules/playwright-core/browsers.json",
+      "./node_modules/playwright-core/lib/**",
+    ],
   },
 };
 
